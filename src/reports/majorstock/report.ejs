@@ -1,0 +1,7 @@
+대량보유 상황보고  
+기업명: <%= reportObject.corp_name %>  
+보고구분: <%= reportObject.report_tp %>  
+대표보고자: <%= reportObject.repror %>  
+보유비율 증감: <%= reportObject.stkrt_irds %>% <%= reportObject.stkrt_irds > 0 ? "🔺" : reportObject.stkrt_irds < 0 ? "🔻" : "" %>  
+보고사유: <%= reportObject.report_resn %>  
+공시링크: [링크](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=<%= reportObject.rcept_no %>)
