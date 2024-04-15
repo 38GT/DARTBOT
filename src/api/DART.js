@@ -26,47 +26,56 @@ export class DART {
   }
 
   static async fetch_data() {
-    try {
-      const response = await axios.get(`https://opendart.fss.or.kr/api/list.json?crtfc_key=${API_KEY}&page_count=10`);
 
+    let updated_today_list;
+
+    try {
+      const response = await axios.get(`https://opendart.fss.or.kr/api/list.json?crtfc_key=${API_KEY}`);
+      const data = response.data;
+ 
       if(response.data.status !== '000') {
         DART.#status_log(response.data.status)
         return;
       }
-
-      console.log('fetch_data 정상 응답')
-
-      if (response.data.total_count !== DART.today_list.length) {
-        const old_list = DART.today_list;
-        const data = response.data;
-        DART.today_list = await DART.#get_today_list(data); // 올바른 값으로 업데이트가 되었다는 것이 확실하게 보장 되어야 한다. 실패 시 업데이트가 그냥 안되고 그 전 todat_list로 유지될 필요가 있다.
-        DART.new_list = DART.today_list.filter(
-          (item) => !old_list.some((disc) => DART.#is_same_disclosure(disc, item))
-        );
+      if(response.data.total_count === DART.today_list.length){
+        console.log('공시 리스트 업데이트 없음');
+        return;
       }
+      
+      if((updated_today_list = await DART.#get_today_list(data)) === null){
+        console.log('updated_todat_list 불러오기 실패')
+        return;
+      }
+      
+      const old_list = DART.today_list;
+      DART.today_list = updated_today_list;
+      DART.new_list = DART.today_list.filter(
+        (item) => !old_list.some((disc) => DART.#is_same_disclosure(disc, item))
+      );
+      console.log('공시 리스트 업데이트 완료')
+      
+      
     } catch (err) {
       console.error("fetch_data 에러 발생", err);
     }
   }
 
   static async #get_today_list(data) {
-    const pageRequests = [];
 
+    const updated_todat_list = []
 
-    const pageNum = data.total_page;
-
-    // 아래 코드로 작동하는지 체크해봐야함
-    // 요청 횟수 줄이기 
-    for (let i = 1; i <= pageNum; i++) {
-      const pageRequest = await axios.get(`https://opendart.fss.or.kr/api/list.json?crtfc_key=${API_KEY}&page_count=10&page_no=${i}`).data.list;
-      pageRequests.push(...pageRequest);
+    const page_num = Math.floor(data.total_count/100)+1
+    for( let i = 1; i <= page_num ; i ++){
+      const response = await axios.get(`https://opendart.fss.or.kr/api/list.json?crtfc_key=${API_KEY}&page_count=100&page_no=${i}`)
+      updated_todat_list.push(...response.data.list)
     }
-    
-    const todayList = [...await Promise.all(pageRequests)];
 
-    if (todayList.length !== data.total_count) throw new Error("#get_today_list length inconsistency problem");
+    if(updated_todat_list.length !== data.total_count){
+      console.log('#get_today_list length inconsistency problem')
+      return null
+    };    
 
-    return todayList;
+    return updated_todat_list;
   }
 
   static #is_same_disclosure(disc1, disc2) {
