@@ -16,7 +16,6 @@ export default class Report {
     this.service = service;
     this.reportFormat = reportFormat;
     this.reportNames = reportNames;
-
   }
 
   static renderFileAsync = promisify(ejs.renderFile);
@@ -40,6 +39,7 @@ export default class Report {
     try {
       const response = await axios.get(`https://opendart.fss.or.kr/api/` + this.service + `.json?crtfc_key=${API_KEY}&corp_code=${data.corp_code}`);
       const list = response.data.list;
+      
       if (list?.length && list[list.length - 1].rcept_dt === today) {
         const reportObject = list[list.length - 1];
         const path = "./reports/" + this.service + "/";
@@ -51,3 +51,4 @@ export default class Report {
     }
   }
 }
+

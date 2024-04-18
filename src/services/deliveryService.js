@@ -10,12 +10,13 @@ const deliverReport = async (reportQueue) => {
   let report;
 
   while ((report = reportQueue.dequeue()) !== null) {
-    console.log(report);
+    console.log('[5]리포트 전송 준비 완료: ', report)
     bot.sendMessage(CHAT_ID, report, {
       parse_mode: "HTML",
     });
+    console.log('[6]리포트 전송 완료: ', report)
   }
-  await delay(10000);
+  await delay(0);
   deliverReport(reportQueue);
 };
 

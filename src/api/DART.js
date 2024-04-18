@@ -35,25 +35,25 @@ export class DART {
  
       if(response.data.status !== '000') {
         DART.#status_log(response.data.status)
-        return;
+        return null;
       }
       if(response.data.total_count === DART.today_list.length){
         console.log('공시 리스트 업데이트 없음');
-        return;
+        return null;
       }
       
       if((updated_today_list = await DART.#get_today_list(data)) === null){
         console.log('updated_todat_list 불러오기 실패')
-        return;
+        return null;
       }
-      
+
       const old_list = DART.today_list;
       DART.today_list = updated_today_list;
       DART.new_list = DART.today_list.filter(
         (item) => !old_list.some((disc) => DART.#is_same_disclosure(disc, item))
       );
       console.log('공시 리스트 업데이트 완료')
-      
+      return DART.new_list
       
     } catch (err) {
       console.error("fetch_data 에러 발생", err);
@@ -62,20 +62,20 @@ export class DART {
 
   static async #get_today_list(data) {
 
-    const updated_todat_list = []
+    const updated_today_list = []
 
     const page_num = Math.floor(data.total_count/100)+1
     for( let i = 1; i <= page_num ; i ++){
       const response = await axios.get(`https://opendart.fss.or.kr/api/list.json?crtfc_key=${API_KEY}&page_count=100&page_no=${i}`)
-      updated_todat_list.push(...response.data.list)
+      updated_today_list.push(...response.data.list)
     }
 
-    if(updated_todat_list.length !== data.total_count){
+    if(updated_today_list.length !== data.total_count){
       console.log('#get_today_list length inconsistency problem')
       return null
     };    
 
-    return updated_todat_list;
+    return updated_today_list;
   }
 
   static #is_same_disclosure(disc1, disc2) {
