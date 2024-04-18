@@ -16,7 +16,7 @@ export const reportPublishing = async (inputQueue, outputQueue) => {
       if (module.isPublisherable(dartData)) {
         console.log('[3]isPublisherable 통과한 리포트: ', dartData)
         const result = module.publish(dartData)
-        console.log('[3.5] publish 메서드를 통해 만들어진 리포트')
+        console.log('[3.5] publish 메서드를 통해 만들어진 리포트',result)
         return result;
       }
       return Promise.resolve(null);
