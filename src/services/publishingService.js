@@ -15,13 +15,13 @@ export const reportPublishing = async (inputQueue, outputQueue) => {
     const promisedReports = reportPublisherModules.map((module) => {
       if (module.isPublisherable(dartData)) {
         const result = module.publish(dartData)
+        console.log('[2.5] isPublisherable 통과한 리포트: ', result)
         return result;
       }
       return Promise.resolve(null);
     });
     const resolvedReports = await Promise.all(promisedReports);
-    if(module.isPublisherable(dartData)) console.log('[3] isPublisherable 통과한 리포트: ', dartData, '리졸브된 리포트', resolvedReports)
-    console.log()
+    console.log('[3] raw DART data: ', dartData, '리졸브된 리포트', resolvedReports)
     resolvedReports.forEach((report) => {
     if (report !== null){
       console.log('[4]퍼블리싱된 리포트: ', report) //여기 리포트는 위에서 나왔던 리포트가 아니라 ejs다. 이런 걸 해결해야할 것 같다. DTO를 도입해서 데이터 포맷을 명시화 시키자.
