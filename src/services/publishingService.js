@@ -20,7 +20,7 @@ export const reportPublishing = async (inputQueue, outputQueue) => {
       return Promise.resolve(null);
     });
     const resolvedReports = await Promise.all(promisedReports);
-    console.log('[3] isPublisherable 통과한 리포트: ', dartData, '리졸브된 리포트', resolvedReports)
+    if(module.isPublisherable(dartData)) console.log('[3] isPublisherable 통과한 리포트: ', dartData, '리졸브된 리포트', resolvedReports)
     console.log()
     resolvedReports.forEach((report) => {
     if (report !== null){
