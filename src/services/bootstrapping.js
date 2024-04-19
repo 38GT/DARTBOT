@@ -26,7 +26,6 @@ const uploadReportPublisherModules = async () => {
 
 export const bootstrapping = async () => {
   await uploadReportPublisherModules();
-  console.log('리포트 업로드 완료: ',reportPublisherModules)
 };
 
 const getReportNamesJson = async (url) => {

@@ -11,17 +11,17 @@ export const reportPublishing = async (inputQueue, outputQueue) => {
   let report_count = 0;
   while ((dartData = inputQueue.dequeue()) !== null) {
     report_count ++
-    console.log('[2]보고서 만들기 전 리포트: ', dartData) //여기 리포트는 위에서 나왔던 리포트가 아니라 ejs다. 이런 걸 해결해야할 것 같다. DTO를 도입해서 데이터 포맷을 명시화 시키자.
+    console.log('[2]raw DART data: ', dartData) //여기 리포트는 위에서 나왔던 리포트가 아니라 ejs다. 이런 걸 해결해야할 것 같다. DTO를 도입해서 데이터 포맷을 명시화 시키자.
     const promisedReports = reportPublisherModules.map((module) => {
       if (module.isPublisherable(dartData)) {
         const result = module.publish(dartData)
-        console.log('[3] isPublisherable 통과한 리포트: ', dartData, 'publish 메서드를 거친 리포트',result)
         return result;
       }
       return Promise.resolve(null);
     });
     const resolvedReports = await Promise.all(promisedReports);
-    console.log('[3.5] 리졸브된 리포트', resolvedReports)
+    console.log('[3] isPublisherable 통과한 리포트: ', dartData, '리졸브된 리포트', resolvedReports)
+    console.log()
     resolvedReports.forEach((report) => {
     if (report !== null){
       console.log('[4]퍼블리싱된 리포트: ', report) //여기 리포트는 위에서 나왔던 리포트가 아니라 ejs다. 이런 걸 해결해야할 것 같다. DTO를 도입해서 데이터 포맷을 명시화 시키자.
