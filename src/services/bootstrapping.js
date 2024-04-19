@@ -16,7 +16,7 @@ const uploadReportPublisherModules = async () => {
       reports.push(Report.from(service));
     }
     reportPublisherModules.push(...(await Promise.all(reports)));
-    console.log("퍼블리셔 모듈 업로드 성공")
+    console.log("퍼블리셔 모듈 업로드 성공",reportPublisherModules)
 
   } catch (err) {
     console.error("퍼블리셔 모듈 업로드 에러", err);
