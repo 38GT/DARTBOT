@@ -16,10 +16,12 @@ const uploadReportPublisherModules = async () => {
       reports.push(Report.from(service));
     }
     reportPublisherModules.push(...(await Promise.all(reports)));
+    console.log("퍼블리셔 모듈 업로드 성공")
 
   } catch (err) {
-    console.error("report 파일 업로드 에러", err);
-  }
+    console.error("퍼블리셔 모듈 업로드 에러", err);
+    await uploadReportPublisherModules()
+  } 
 };
 
 export const bootstrapping = async () => {
