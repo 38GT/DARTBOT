@@ -5,28 +5,33 @@ dotenv.config({ path: "../.env" });
 import axios from "axios";
 const API_KEY = process.env.API_KEY;
 import fs from "fs/promises";
+import now from '../utils/now.js'
 
 export const reportPublishing = async (inputQueue, outputQueue) => {
-  let dartData;
-  let report_count = 0;
-  while ((dartData = inputQueue.dequeue()) !== null) {
-    report_count ++
-    console.log('[2]raw DART data: ', dartData) //여기 리포트는 위에서 나왔던 리포트가 아니라 ejs다. 이런 걸 해결해야할 것 같다. DTO를 도입해서 데이터 포맷을 명시화 시키자.
-    const promisedReports = reportPublisherModules.map((module) => {
-      if (module.isPublisherable(dartData)) {
-        const result = module.publish(dartData)
-        console.log('[2.5] isPublisherable 통과한 리포트: ', result)
-        return result;
+  let queueData ;
+  let dartData ; 
+  while ((queueData = inputQueue.dequeue()) !== null && (dartData = queueData.data) !== null) {
+    const reports = reportPublisherModules.map(async (module) => {
+      if (module.isPublisherable(queueData)) {
+        const copy = {... queueData}
+        const val = await module.publish(copy)
+        queueData.data = val
+        queueData.logs.push('[3]isPublisherable: ' + 'isPublisherable 값 true ' + now())
+        return queueData;
+      }else{
+        queueData.data = null
+        queueData.logs.push('[3]isPublisherable: ' + 'isPublisherable 값 false ' + now())
+        console.log(queueData);
+        return queueData;
       }
-      return Promise.resolve(null);
     });
-    const resolvedReports = await Promise.all(promisedReports);
-    console.log('[3] raw DART data: ', dartData, '리졸브된 리포트', resolvedReports)
+
+    const resolvedReports = await Promise.all(reports)
+    console.log('test14: ',resolvedReports)
     resolvedReports.forEach((report) => {
-    if (report !== null){
-      console.log('[4]퍼블리싱된 리포트: ', report) //여기 리포트는 위에서 나왔던 리포트가 아니라 ejs다. 이런 걸 해결해야할 것 같다. DTO를 도입해서 데이터 포맷을 명시화 시키자.
-      outputQueue.enqueue(report);
-    }
+      if (report.data !== null){
+        outputQueue.enqueue(report);
+      }
     });
   }
   await delay(0);
