@@ -1,0 +1,7 @@
+임원ㆍ주요주주 특정증권등 소유상황보고  
+기업명: <%= reportObject.corp_name %>  
+대표보고자: <%= reportObject.repror %>  
+발행 회사 관계 임원 직위: <%= reportObject.isu_exctv_ofcps %>
+발행 회사 관계 주요 주주: <%= reportObject.isu_main_shrholdr %>
+특정 증권 등 소유 증감 비율: <%= reportObject.sp_stock_lmp_irds_rate %>% <%= reportObject.sp_stock_lmp_irds_rate > 0 ? "🔺" : reportObject.sp_stock_lmp_irds_rate < 0 ? "🔻" : "" %>  
+공시링크: [링크](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=<%= reportObject.rcept_no %>)
