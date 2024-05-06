@@ -1,21 +1,28 @@
-import TelegramBot from "node-telegram-bot-api";
 import delay from "../utils/delay.js";
 import dotenv from "dotenv";
 import now from '../utils/now.js'
+import { bot } from '../bot/teleBot.js'
+import { getSubscribers } from '../data/DB.js'
 dotenv.config({ path: "../.env" });
 const CHAT_ID = process.env.CHAT_ID;
-const TELE_TOKEN = process.env.TELE_TOKEN;
-const bot = new TelegramBot(TELE_TOKEN, { polling: true });
 
 const deliverReport = async (reportQueue) => {
   let queueData ;
   let dartData ; 
   while ((queueData = reportQueue.dequeue()) !== null && (dartData = queueData.data) !== null) {
     try{
-      bot.sendMessage(CHAT_ID, JSON.stringify(dartData), {
-        parse_mode: "HTML",
-      });
+      console.log('queueData: ', queueData)
+      console.log('queueData.data.type: ', queueData.type)
+      const subscribers = await getSubscribers(queueData.type)
+      console.log('구독자들: ', subscribers)
+      for (let data of subscribers ){
+        console.log('user: ',data.user_id)
+        bot.sendMessage(data.user_id, queueData.data, {
+          parseMode: "html",
+        });
+      }   
       queueData.logs.push('[4]delivery: ' + '전송 성공' + now())
+      console.log(queueData);
     }catch(err){
     }
   }
@@ -25,17 +32,3 @@ const deliverReport = async (reportQueue) => {
 
 export default deliverReport;
 
-
-// 순환 참조 대체를 위한 함수
-function getCircularReplacer() {
-  const seen = new WeakSet();
-  return (key, value) => {
-    if (typeof value === "object" && value !== null) {
-      if (seen.has(value)) {
-        return;
-      }
-      seen.add(value);
-    }
-    return value;
-  };
-}

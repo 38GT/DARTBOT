@@ -37,19 +37,19 @@ export class DART {
       const data = response.data;
  
       if(response.data.status !== '000') {
-        const result = [{id: null, corp: null, data: null, logs: ['[0]fetch_data: ' + DART.#status_log(response.data.status) + now()]}];
+        const result = [{id: null, corp: null, type: null,data: null, logs: ['[0]fetch_data: ' + DART.#status_log(response.data.status) + now()]}];
         console.log(result)
         return result
       }
 
       if(response.data.total_count === DART.today_list.length){
-        const result = [{id: null, corp: null, data: null, logs: ['[0]fetch_data: ' + '공시 리스트 업데이트 없음' + now()]}]
+        const result = [{id: null, corp: null, type: null, data: null, logs: ['[0]fetch_data: ' + '공시 리스트 업데이트 없음' + now()]}]
         console.log(result);
         return result;
       }
       
       if((updated_today_list = await (DART.#get_today_list(data)))[0].data === null){
-        const result = [{id: null, corp: null, data: null, logs: ['[0]fetch_data: ' + 'updated_today_list 불러오기 실패' + now()]}]
+        const result = [{id: null, corp: null, type: null, data: null, logs: ['[0]fetch_data: ' + 'updated_today_list 불러오기 실패' + now()]}]
         console.log(result);
         return result;
       }
@@ -77,15 +77,15 @@ export class DART {
     for( let i = 1; i <= page_num ; i ++){
       const response = await axios.get(`https://opendart.fss.or.kr/api/list.json?crtfc_key=${API_KEY}&page_count=100&page_no=${i}`)
       updated_today_list.push(...response.data.list.map(item => {
-        const [ id, corp ] = [item.rcept_no, item.corp_name]
-        const result = {id: id, corp: corp, data: item, logs: ['[1]#get_today_list: ' + now()]}
+        const [ id, corp, type ] = [item.rcept_no, item.corp_name, item.report_nm]
+        const result = {id: id, corp: corp, type: type, data: item, logs: ['[1]#get_today_list: ' + now()]}
         return result
       }
       ))
     }
 
     if(updated_today_list.length !== data.total_count){
-      const result = {id: null, corp: null, data: null, logs: ['[1]#get_today_list: ' + 'length inconsistency problem' + now()]}
+      const result = {id: null, corp: null, type: null, data: null, logs: ['[1]#get_today_list: ' + 'length inconsistency problem' + now()]}
       console.log(result)
       return result;
     };    

@@ -6,28 +6,32 @@ import axios from "axios";
 const API_KEY = process.env.API_KEY;
 import fs from "fs/promises";
 import now from '../utils/now.js'
+import AdmZip from 'adm-zip'
+import xml2js from 'xml2js'
 
 export const reportPublishing = async (inputQueue, outputQueue) => {
   let queueData ;
   let dartData ; 
   while ((queueData = inputQueue.dequeue()) !== null && (dartData = queueData.data) !== null) {
+    const new_data = {...queueData}
     const reports = reportPublisherModules.map(async (module) => {
       if (module.isPublisherable(queueData)) {
+        queueData.logs.push('[2]isPublisherable: ' + 'isPublisherable 값 true ' + now())
         const copy = {... queueData}
-        const val = await module.publish(copy)
-        queueData.data = val
-        queueData.logs.push('[3]isPublisherable: ' + 'isPublisherable 값 true ' + now())
-        return queueData;
+        const result = await module.publish(copy)
+        queueData = new_data
+        return result
       }else{
+        queueData.logs.push('[2]isPublisherable: ' + 'isPublisherable 값 false ' + now())
         queueData.data = null
-        queueData.logs.push('[3]isPublisherable: ' + 'isPublisherable 값 false ' + now())
         console.log(queueData);
-        return queueData;
+        const result = queueData;
+        queueData = new_data
+        return result;
       }
     });
 
     const resolvedReports = await Promise.all(reports)
-    console.log('test14: ',resolvedReports)
     resolvedReports.forEach((report) => {
       if (report.data !== null){
         outputQueue.enqueue(report);
@@ -75,3 +79,5 @@ const getCorpCodesJson = async (url, path) => {
     console.log(err);
   }
 };
+
+// getCorpCodesJson(`https://opendart.fss.or.kr/api/elestock.json?crtfc_key=${API_KEY}`)

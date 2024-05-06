@@ -2,6 +2,7 @@ import axios from "axios";
 import fs from "fs/promises";
 import dotenv from "dotenv";
 import Report from "../reports/Report.js";
+import { subscriptionController } from '../services/subscriptionService.js'
 dotenv.config({ path: "../../.env" });
 
 export const reportPublisherModules = [];
@@ -26,6 +27,8 @@ const uploadReportPublisherModules = async () => {
 
 export const bootstrapping = async () => {
   await uploadReportPublisherModules();
+  subscriptionController()
+  //서비스 업데이트 로직 await updateServices()
 };
 
 const getReportNamesJson = async (url) => {
