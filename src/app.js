@@ -11,7 +11,7 @@ const main = async () => {
   const dartQueue = new Queue();
   const reportQueue = new Queue();
   await bootstrapping();
-  pollingDARTdata(dartQueue, 0);
+  pollingDARTdata(dartQueue, 6000);
   // testPolling(dartQueue,60000)
   reportPublishing(dartQueue, reportQueue);
   deliverReport(reportQueue);

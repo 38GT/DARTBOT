@@ -12,14 +12,6 @@ const db = mysql.createConnection({
   database:process.env.DB_DATABASE,
 });
 
-// 데이터베이스 연결
-// db.connect(err => {
-//     if (err) {
-//         throw err;
-//     }
-//     console.log('MySQL connected...');
-// });
-
 db.query = util.promisify(db.query);
 
 export const getServices = async (user_id)=>{
@@ -28,48 +20,41 @@ export const getServices = async (user_id)=>{
   FROM services s
   JOIN subscriptions sub ON s.service_id = sub.service_id
   WHERE sub.user_id = ?
-`
-  return db.query(query,[user_id])
+  `
+  const result = new Map() ;
+  const data = await db.query(query,[user_id])
+  data.forEach(item => {
+    result.set(item.service_id,item.service_name)
+  })
+
+  return result;
 }
 
 export const getServicesAll = async () => {
-  return db.query('SELECT * FROM services')
+  const result = new Map() ;
+  const data = await db.query('SELECT * FROM services')
+  data.forEach(item => {
+    result.set(item.service_id,item.service_name)
+  })
+  return result;
 }
+
 export const updateSubscriptions = async (chatId, selectedServices) => {
-    try {
-    //   const connection = await pool.getConnection();
-  
+    try {  
       // 기존 구독 정보를 삭제
       await db.query('DELETE FROM subscriptions WHERE user_id = ?', [chatId]);
   
       // 새 구독 정보를 추가
       if (selectedServices.size > 0) {
-        const values = Array.from(selectedServices).map(serviceId => [chatId, serviceId]);
+        const values = Array.from(selectedServices).map(([serviceId, serviceName]) => [chatId, serviceId]);        
         await db.query('INSERT INTO subscriptions (user_id, service_id) VALUES ?', [values]);
       }
-  
-    //   connection.release();
       console.log('Subscriptions updated successfully');
       return true;
     } catch (error) {
       console.error('Failed to update subscriptions:', error);
       return false;
     }
-  }
-
-export const getSubscribers2 = async (service_name) => {
-  const query = `
-  SELECT DISTINCT user_id
-  FROM subscriptions
-  WHERE service_name = '${service_name}';
-  `;
-  try{
-    const result = await db.query(query)
-    return result;
-  }catch(err){
-    console.log(err)
-  }
-
 }
 
 export const getSubscribers = async (service_name) => {

@@ -77,7 +77,7 @@ export class DART {
     for( let i = 1; i <= page_num ; i ++){
       const response = await axios.get(`https://opendart.fss.or.kr/api/list.json?crtfc_key=${API_KEY}&page_count=100&page_no=${i}`)
       updated_today_list.push(...response.data.list.map(item => {
-        const [ id, corp, type ] = [item.rcept_no, item.corp_name, item.report_nm]
+        const [ id, corp, type ] = [item.rcept_no, item.corp_name, item.report_nm.replace(/\[.*?\]|\([^)]*\)/g, '')]
         const result = {id: id, corp: corp, type: type, data: item, logs: ['[1]#get_today_list: ' + now()]}
         return result
       }

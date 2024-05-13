@@ -14,6 +14,7 @@ export const reportPublishing = async (inputQueue, outputQueue) => {
   let dartData ; 
   while ((queueData = inputQueue.dequeue()) !== null && (dartData = queueData.data) !== null) {
     const new_data = {...queueData}
+    console.log('new_data: ',new_data)
     const reports = reportPublisherModules.map(async (module) => {
       if (module.isPublisherable(queueData)) {
         queueData.logs.push('[2]isPublisherable: ' + 'isPublisherable 값 true ' + now())

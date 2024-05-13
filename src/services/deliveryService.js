@@ -11,15 +11,11 @@ const deliverReport = async (reportQueue) => {
   let dartData ; 
   while ((queueData = reportQueue.dequeue()) !== null && (dartData = queueData.data) !== null) {
     try{
-      console.log('queueData: ', queueData)
-      console.log('queueData.data.type: ', queueData.type)
       const subscribers = await getSubscribers(queueData.type)
       console.log('구독자들: ', subscribers)
       for (let data of subscribers ){
         console.log('user: ',data.user_id)
-        bot.sendMessage(data.user_id, queueData.data, {
-          parseMode: "html",
-        });
+        bot.sendMessage(data.user_id, queueData.data);
       }   
       queueData.logs.push('[4]delivery: ' + '전송 성공' + now())
       console.log(queueData);

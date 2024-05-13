@@ -1,6 +1,6 @@
 {
   "name": "dartbot",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.9.7",
     "node-telegram-bot-api": "^0.64.0",
+    "puppeteer": "^22.8.0",
     "util": "^0.12.5",
     "xml2js": "^0.6.2"
   },

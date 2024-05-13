@@ -5,11 +5,8 @@ import delay from '../utils/delay.js'
 export async function pollingDARTdata(queue, period) {
   try {
     const new_list = await DART.fetch_data();
-    if(new_list[0].data === null) return;
-    await delay(20 * 60 * 100)
-    DART.new_list.forEach((data) => {
-      console.log('test6: ', data)
-      queue.enqueue(data);
+    new_list.forEach((item) => {
+      if(item.data) queue.enqueue(item);
     });
     DART.new_list = [];
   } catch (err) {

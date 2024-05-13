@@ -1,9 +1,7 @@
 import fs from "fs/promises";
-import axios from "axios";
 import dotenv from "dotenv";
+import puppeteer from "puppeteer";
 dotenv.config({ path: "../.env" });
-const API_KEY = process.env.API_KEY;
-import today from "../utils/today.js";
 import ejs from "ejs";
 import { promisify } from "util";
 import now from '../utils/now.js'
@@ -39,47 +37,50 @@ export default class Report {
 
   }
 
-  async publish(data) {
+  async publish(input) {
     try {
-      const response = await axios.get(`https://opendart.fss.or.kr/api/` + this.service + `.json?crtfc_key=${API_KEY}&corp_code=${data.corp_code}`);
-      const result = data
-      const list = response.data.list;
-
-      //여기에는 list?.length && list[list.length - 1].rcept_dt === today 같은 코드가 존재하면 안된다. 이것 전부 isPublishable 함수 안에 있어야 한다.
-
-      // console.log('분기 확인: ', list?.length && list[list.length - 1].rcept_dt === today)
-      // if (list?.length && list[list.length - 1].rcept_dt === today) {
-        // const reportObject = list[list.length - 1];
-        const reportObject = {
-          rcept_no: '17561756',
-          recept_dt: today,
-          corp_code: '37341756',
-          corp_name: 'test_corp',
-          report_tp: '주식등의 대량보유상황 보고구분',
-          repror: '최진혁',
-          stkqy: '1000',
-          stkqy_irds:	3,
-          stkrt: 20,
-          stkrt_irds: 4,
-          ctr_stkqy: 5,
-          ctr_stkrt: 6,
-          report_resn: '테스트 보고사유'
-        }
-
-        // const path = "./reports/" + this.service + "/";
-        const html = await Report.renderFileAsync(this.reportFormat, { reportObject });
-        result.data = html
-        result.logs.push('[3]publish: ' + 'publish 성공'+ now())
-        return result;
-      // } else {
-        result.data = null
-        result.logs.push('[3]publish: ' + 'publish 실패'+ now())
-        console.log(result)
-        return result;
-      // }
+      const rcept_no = input.data.rcept_no;
+      const url = `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rcept_no}`
+      input.data = await extractIframeContentWithStructure(url)
+      input.logs.push('[3]publish: ' + 'publish 성공'+ now())
+      return input;
     } catch (err) {
       console.log(err);
     }
   }
 }
 
+async function extractIframeContentWithStructure(url) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "networkidle0" });
+  let result;
+  const elementHandles = await page.$$("iframe");
+  for (const handle of elementHandles) {
+    const frame = await handle.contentFrame();
+    if (frame) {
+      // iframe 내부의 모든 요소 순회
+      const tdTexts = await frame.evaluate(() => {
+        const tds = Array.from(document.querySelectorAll("td"));
+        return tds.map((td) => td.innerText);
+      });
+      /*
+      보고자명 tdTests[10]
+      회사명 tdTests[13]\
+      전 주식 보유 비율 tdTests[24]
+      현재 주식 보유 비율 tdTests[27]
+      보고 사유 tdTests[59]
+      */
+      const report = `
+        대량보유상황보고
+        보고자명: ${tdTexts[10]}
+        회사명: ${tdTexts[13]}
+        보유량변화: ${tdTexts[24]}% → ${tdTexts[27]}% (${tdTexts[27]-tdTexts[24]}%)
+        보고사유: ${tdTexts[59]}
+        `;
+      result = report;
+    }
+  }
+  await browser.close();
+  return result;
+}

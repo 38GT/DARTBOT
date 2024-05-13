@@ -3,30 +3,25 @@ import { updateSubscriptions, getServices, getServicesAll } from '../data/DB.js'
 import { bot } from '../bot/teleBot.js'
 dotenv.config({ path: "../.env" });
 
+export const subscriptionController = async () =>{
+    const allServices = await getServicesAll();
+    const userStates = new Map()
 
-export const subscriptionController = () =>{
-    const rooms = new Map();
-    let controller_id = ''
-    
     bot.on('message', async (msg) => {
         const chatId = msg.chat.id;
-    
-        if (!rooms.has(chatId)) {
-            rooms.set(chatId, {
-                subscriptions: await getServicesAll(chatId),
-                selectedServices: new Set() 
-            });
-            console.log('chatId: ', chatId)
-            const services = await getServices(chatId);
-            console.log('services: ', services);
-            rooms.get(chatId).selectedServices.add()
+        const serviceButtons = [];
+
+        //초기화
+        if(!userStates.has(chatId)){
+            const subscriptionInfo = await getServices(chatId);
+            userStates.set(chatId, new Map([['subscriptionInfo',subscriptionInfo],['controller_id','']]))
         }
-    
-        const serviceButtons = rooms.get(chatId).subscriptions.map(service => {
-            const isSelected = rooms.get(chatId).selectedServices.has(service.service_id);
-            return [{ text: isSelected ? `✅ ${service.service_name}` : `${service.service_name}`, callback_data: `toggle_${service.service_id}` }];
-        });
-    
+
+        allServices.forEach((serviceName, serviceId) => {
+            const isSelected = userStates.get(chatId).get('subscriptionInfo').has(serviceId)
+            serviceButtons.push([{ text: isSelected ? `✅ ${serviceName}` : `${serviceName}`, callback_data: `toggle_${serviceId}` }]);
+        })
+
         const options = {
             parse_mode: 'HTML',
             reply_markup: JSON.stringify({
@@ -36,36 +31,37 @@ export const subscriptionController = () =>{
                 ]
             })
         };
-    
+
         bot.sendMessage(chatId, "<b>서비스 구독 관리</b>", options).then(
-          msg => {
-            if(controller_id !== '') bot.deleteMessage(chatId, controller_id)
-            controller_id = msg.message_id
-          }
+            msg => {
+              const controller_id = userStates.get(chatId).get('controller_id')
+              if(controller_id !== '') bot.deleteMessage(chatId, controller_id)
+              userStates.get(chatId).set('controller_id',msg.message_id) 
+            }
         );
-    });
+    })
     
     bot.on('callback_query', async (callbackQuery) => {
         const message = callbackQuery.message;
         const chatId = message.chat.id;
         const data = callbackQuery.data;
-        const roomInfo = rooms.get(chatId);
-    
+        console.log('test: ',userStates.get(chatId))
+        const subscriptionInfo = userStates.get(chatId).get('subscriptionInfo')
         if (data.startsWith('toggle_')) {
             const serviceId = data.split('_')[1];
-            const selectedServices = roomInfo.selectedServices;
-    
-            if (selectedServices.has(serviceId)) {
-                selectedServices.delete(serviceId);
+
+            if (subscriptionInfo.has(serviceId)) {
+                subscriptionInfo.delete(serviceId);
             } else {
-                selectedServices.add(serviceId);
+                subscriptionInfo.set(serviceId,allServices.get(serviceId));
             }
-    
-            const serviceButtons = roomInfo.subscriptions.map(service => {
-                const isSelected = selectedServices.has(service.service_id);
-                return [{ text: isSelected ? `✅ ${service.service_name}` : `${service.service_name}`, callback_data: `toggle_${service.service_id}` }];
-            });
-    
+            const serviceButtons = [];
+
+            allServices.forEach((serviceName, serviceId) => {
+                const isSelected = userStates.get(chatId).get('subscriptionInfo').has(serviceId)
+                serviceButtons.push([{ text: isSelected ? `✅ ${serviceName}` : `${serviceName}`, callback_data: `toggle_${serviceId}` }]);
+            })
+            
             const options = {
                 parse_mode: 'HTML',
                 reply_markup: JSON.stringify({
@@ -75,15 +71,17 @@ export const subscriptionController = () =>{
                     ]
                 })
             };
-    
+            
             bot.editMessageText("<b>서비스 구독 관리</b>", {
                 chat_id: chatId,
                 message_id: message.message_id,
                 parse_mode: 'HTML',
                 reply_markup: options.reply_markup
             });
+            
         } else if (data === 'apply_changes') {
-            const updateSuccess = await updateSubscriptions(chatId, roomInfo.selectedServices);
+            const subscriptionInfo = userStates.get(chatId).get('subscriptionInfo');
+            const updateSuccess = await updateSubscriptions(chatId, subscriptionInfo);
             if (updateSuccess) {
               bot.sendMessage(chatId, "변경 사항이 저장되었습니다.");
             } else {
