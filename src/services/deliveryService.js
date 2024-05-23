@@ -13,7 +13,6 @@ const deliverReport = async (reportQueue) => {
       const result = {...queueData};
       const service_id  = [...app.get('allServices')].find(
         ([_, service_nm]) => {
-        console.log('비교: ', service_nm.replace(/\[.*?\]|\([^)]*\)/g, ''), result.type.replace(/\[.*?\]|\([^)]*\)/g, ''))
         return service_nm.replace(/\s+/g, '') === result.type.replace(/\s+/g, '')
       }
       )[0]
