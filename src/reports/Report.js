@@ -7,6 +7,7 @@ import { getServicesAll } from '../data/DB.js'
 
 export default class Report {
   service_id;
+  report_nm;
   report_format;
 
   constructor(service_id, report_nm, report_format) {
