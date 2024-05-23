@@ -3,23 +3,29 @@ import dotenv from "dotenv";
 import now from '../utils/now.js'
 import { bot } from '../bot/teleBot.js'
 import { getSubscribers } from '../data/DB.js'
+import { app } from '../app.js'
 dotenv.config({ path: "../.env" });
-const CHAT_ID = process.env.CHAT_ID;
 
 const deliverReport = async (reportQueue) => {
   let queueData ;
-  let dartData ; 
-  while ((queueData = reportQueue.dequeue()) !== null && (dartData = queueData.data) !== null) {
+  while ((queueData = reportQueue.dequeue()) !== null && queueData.data !== null) {
     try{
-      const subscribers = await getSubscribers(queueData.type)
-      console.log('구독자들: ', subscribers)
+      const result = {...queueData};
+      const service_id  = [...app.get('allServices')].find(
+        ([_, service_nm]) => {
+        console.log('비교: ', service_nm.replace(/\[.*?\]|\([^)]*\)/g, ''), result.type.replace(/\[.*?\]|\([^)]*\)/g, ''))
+        return service_nm.replace(/\s+/g, '') === result.type.replace(/\s+/g, '')
+      }
+      )[0]
+      const subscribers = await getSubscribers(service_id)
       for (let data of subscribers ){
-        console.log('user: ',data.user_id)
-        bot.sendMessage(data.user_id, queueData.data);
+        bot.sendMessage(data.user_id, result.data);
+        console.log('sending: ',data.user_id, result.data)
       }   
-      queueData.logs.push('[4]delivery: ' + '전송 성공' + now())
-      console.log(queueData);
+      result.logs.push('[4]delivery: ' + '전송 성공' + now())
+      console.log(result);
     }catch(err){
+      console.log('deliverReport error: ',err)
     }
   }
   await delay(0);

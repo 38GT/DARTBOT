@@ -1,10 +1,12 @@
 import dotenv from "dotenv";
 import { updateSubscriptions, getServices, getServicesAll } from '../data/DB.js'
 import { bot } from '../bot/teleBot.js'
+import { app } from '../app.js'
 dotenv.config({ path: "../.env" });
 
 export const subscriptionController = async () =>{
-    const allServices = await getServicesAll();
+    app.set('allServices', await getServicesAll());
+    const allServices = app.get('allServices')
     const userStates = new Map()
 
     bot.on('message', async (msg) => {
@@ -45,7 +47,6 @@ export const subscriptionController = async () =>{
         const message = callbackQuery.message;
         const chatId = message.chat.id;
         const data = callbackQuery.data;
-        console.log('test: ',userStates.get(chatId))
         const subscriptionInfo = userStates.get(chatId).get('subscriptionInfo')
         if (data.startsWith('toggle_')) {
             const serviceId = data.split('_')[1];

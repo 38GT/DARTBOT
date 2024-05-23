@@ -57,15 +57,15 @@ export const updateSubscriptions = async (chatId, selectedServices) => {
     }
 }
 
-export const getSubscribers = async (service_name) => {
+export const getSubscribers = async (service_id) => {
   const query = `
     SELECT DISTINCT user_id
     FROM subscriptions
     JOIN services ON subscriptions.service_id = services.service_id
-    WHERE services.service_name = ?;
+    WHERE services.service_id = ?;
   `;
   try {
-    const result = await db.query(query, [service_name]); // service_name을 안전하게 쿼리에 바인딩
+    const result = await db.query(query, [service_id]); // service_name을 안전하게 쿼리에 바인딩
     return result;
   } catch (err) {
     console.error('Error querying database:', err);

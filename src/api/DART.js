@@ -47,8 +47,10 @@ export class DART {
         console.log(result);
         return result;
       }
-      
-      if((updated_today_list = await (DART.#get_today_list(data)))[0].data === null){
+
+      updated_today_list = await DART.#get_today_list(data);
+
+      if(updated_today_list[0].data === null || updated_today_list === undefined ){
         const result = [{id: null, corp: null, type: null, data: null, logs: ['[0]fetch_data: ' + 'updated_today_list 불러오기 실패' + now()]}]
         console.log(result);
         return result;
@@ -65,7 +67,6 @@ export class DART {
       
     } catch (err) {
       console.error("fetch_data 에러 발생", err);
-      console.log('test',updated_today_list)
     }
   }
 
@@ -85,7 +86,7 @@ export class DART {
     }
 
     if(updated_today_list.length !== data.total_count){
-      const result = {id: null, corp: null, type: null, data: null, logs: ['[1]#get_today_list: ' + 'length inconsistency problem' + now()]}
+      const result = [{id: null, corp: null, type: null, data: null, logs: ['[1]#get_today_list: ' + 'length inconsistency problem' + now()]}]
       console.log(result)
       return result;
     };    

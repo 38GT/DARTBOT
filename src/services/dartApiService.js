@@ -4,7 +4,12 @@ import now from '../utils/now.js';
 import delay from '../utils/delay.js'
 export async function pollingDARTdata(queue, period) {
   try {
-    const new_list = await DART.fetch_data();
+    const old_list = [...DART.today_list]
+    let new_list = await DART.fetch_data();
+    if(new_list === undefined){
+      DART.today_list = old_list;
+      return;
+    }
     new_list.forEach((item) => {
       if(item.data) queue.enqueue(item);
     });
