@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 
 const crawlingDART = async (url) => {
   const browser = await puppeteer.launch({ 
-    headless: false,                 
+    headless: true,                 
     args: ['--no-sandbox', '--disable-setuid-sandbox'] // 필요한 인자 추가 -> 나중에 필요할 수 있으니 테스트해보고 필요 없으면 제거
    });                                                                                                                                                                                 
   const page = await browser.newPage();
