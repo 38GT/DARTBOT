@@ -5,7 +5,7 @@ import { app } from '../app.js'
 dotenv.config({ path: "../.env" });
 
 export const subscriptionController = async () =>{
-    app.set('allServices', await getServicesAll());
+
     const allServices = app.get('allServices')
     const userStates = new Map()
 
@@ -47,6 +47,12 @@ export const subscriptionController = async () =>{
         const message = callbackQuery.message;
         const chatId = message.chat.id;
         const data = callbackQuery.data;
+
+        if(!userStates.has(chatId)){
+            const subscriptionInfo = await getServices(chatId);
+            userStates.set(chatId, new Map([['subscriptionInfo',subscriptionInfo],['controller_id','']]))
+        }
+        
         const subscriptionInfo = userStates.get(chatId).get('subscriptionInfo')
         if (data.startsWith('toggle_')) {
             const serviceId = data.split('_')[1];

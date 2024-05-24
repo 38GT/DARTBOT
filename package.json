@@ -1,6 +1,6 @@
 {
   "name": "dartbot",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,18 @@
     "node-telegram-bot-api": "^0.64.0",
     "puppeteer": "^22.9.0",
     "util": "^0.12.5",
-    "xml2js": "^0.6.2"
+    "xml2js": "^0.6.2",
+    "atk": "^2.36.0",
+    "at-spi2-atk": "^2.34.1",
+    "cups-libs": "^2.3.3",
+    "libXcomposite": "^0.4.5",
+    "libXrandr": "^1.5.2",
+    "libXdamage": "^1.1.5",
+    "libXfixes": "^5.0.3",
+    "pango": "^1.44.7",
+    "libgbm": "^18.3.1",
+    "libxkbcommon": "^0.8.4",
+    "alsa-lib": "^1.1.9"
   },
   "type": "module"
 }
