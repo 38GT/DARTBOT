@@ -2,7 +2,10 @@
 
 ## Telegram DART streaming service
 
-## version: 4.0.5
+## version: 5.0.1
+
+Nest 프레임워크 서버코드 추가
+상용 어플리케이션 소스코드임에 따라 자세한 내용이 생략된 코드가 존재합니다.
 
 ## services:
 
